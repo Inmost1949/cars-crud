@@ -25,6 +25,11 @@ def test_user_edits_car_and_change_survives_reload(page, live_server):
     expect(page).to_have_url(re.compile(r"/cars/\d+$"))
     page.get_by_role("link", name="Edit car").click()
 
+    # Wait for the edit form to hydrate before typing. loadForm() fetches the car
+    # asynchronously and writes the stored values into the inputs, so typing too
+    # early gets silently overwritten and the save sends the old values.
+    expect(page.get_by_label("Model", exact=True)).to_have_value("Civic")
+
     page.get_by_label("Model", exact=True).fill("Accord")
     page.get_by_label("Year", exact=True).fill("2023")
     page.get_by_role("button", name="Save changes").click()
